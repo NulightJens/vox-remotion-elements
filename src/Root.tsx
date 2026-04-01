@@ -5,7 +5,7 @@ import { TextHighlighter } from "./components/TextHighlighter";
 import { HandDrawnReveal } from "./components/HandDrawnReveal";
 import { OffsetGroup } from "./components/OffsetGroup";
 import { ArticleZoom } from "./components/ArticleZoom";
-
+import { TextMatchCut } from "./components/TextMatchCut";
 import { VoxTheme } from "./theme";
 
 const AnalogTestContent: React.FC = () => (
@@ -107,6 +107,23 @@ const ArticleZoomTestContent: React.FC = () => (
   </AnalogTreatment>
 );
 
+const MatchCutTestContent: React.FC = () => (
+  <AnalogTreatment>
+    <TextMatchCut
+      screenshots={[
+        { src: "https://picsum.photos/seed/1/1080/1920", wordPosition: "center" },
+        { src: "https://picsum.photos/seed/2/1080/1920", wordPosition: "center" },
+        { src: "https://picsum.photos/seed/3/1080/1920", wordPosition: "center" },
+        { src: "https://picsum.photos/seed/4/1080/1920", wordPosition: "center" },
+        { src: "https://picsum.photos/seed/5/1080/1920", wordPosition: "center" },
+      ]}
+      framesPerImage={4}
+      highlightWord={true}
+      highlightDelay={5}
+    />
+  </AnalogTreatment>
+);
+
 const OffsetGroupTestContent: React.FC = () => (
   <AnalogTreatment>
     <AbsoluteFill
@@ -173,6 +190,14 @@ export const Root: React.FC = () => {
         id="ArticleZoomTest"
         component={ArticleZoomTestContent}
         durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="MatchCutTest"
+        component={MatchCutTestContent}
+        durationInFrames={90}
         fps={30}
         width={1080}
         height={1920}
