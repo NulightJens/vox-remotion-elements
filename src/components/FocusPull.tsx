@@ -7,7 +7,7 @@ export type FocusPullProps = {
   framesPerStep?: number;
   delay?: number;
   easing?: ((t: number) => number) | null;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   style?: CSSProperties;
 };
@@ -56,13 +56,13 @@ export const FocusPull: React.FC<FocusPullProps> = ({
       style={{
         position: "absolute",
         inset: 0,
-        filter: `blur(${currentRadius}px)`,
+        backdropFilter: currentRadius > 0 ? `blur(${currentRadius}px)` : undefined,
+        WebkitBackdropFilter: currentRadius > 0 ? `blur(${currentRadius}px)` : undefined,
+        pointerEvents: "none",
         ...style,
       }}
     >
-      <div style={{ position: "relative", width: "100%", height: "100%" }}>
-        {children}
-      </div>
+      {children}
     </div>
   );
 };

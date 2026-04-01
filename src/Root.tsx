@@ -239,14 +239,12 @@ const FocusPullTestContent: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    {/* FocusPull transition: blurs up during scene A exit, sharp at scene B entry */}
+    {/* FocusPull transition: overlay that blurs everything beneath it */}
     <Sequence from={30} durationInFrames={24}>
       <FocusPull
         blurSteps={[0, 5, 10, 15, 15, 10, 5, 0]}
         framesPerStep={3}
-      >
-        <AbsoluteFill />
-      </FocusPull>
+      />
     </Sequence>
 
     {/* Scene B: visible frames 45-89 */}

@@ -37,9 +37,7 @@ export const ArchivalMontage: React.FC = () => (
         <FocusPull
           blurSteps={[0, 12, 8, 4, 12, 8, 4, 0]}
           framesPerStep={2}
-        >
-          <AbsoluteFill />
-        </FocusPull>
+        />
       </Sequence>
 
       {/* Source 2: frames 60-119 */}
@@ -57,9 +55,7 @@ export const ArchivalMontage: React.FC = () => (
         <FocusPull
           blurSteps={[0, 15, 10, 5, 15, 10, 5, 0]}
           framesPerStep={2}
-        >
-          <AbsoluteFill />
-        </FocusPull>
+        />
       </Sequence>
 
       {/* Source 3: frames 120-179 with Article3D rotation */}
