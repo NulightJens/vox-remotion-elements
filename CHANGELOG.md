@@ -1,5 +1,43 @@
 # Changelog
 
+## v0.2.0 — 2026-04-01
+
+### New Components
+
+- **TypewriterReveal** — Letter-by-letter text reveal for Vox title cards. Configurable `framesPerChar` timing, optional blinking cursor, optional `roughness` for hand-stamped look via RoughenEdgesFilter. Supports `string | string[]` for multi-line with sequential/parallel modes. Default font: VoxTheme.fonts.accent (Bebas Neue).
+- **GridBackground** — Graph paper / grid overlay with organic mask and wiggle. Pure CSS grid via `repeating-linear-gradient`. Mask presets: `'blob'` (procedural 8-point polygon with noise-perturbed vertices), `'rect'`, `'ellipse'`, or custom SVG path data. Feathered edges, configurable wiggle via `noise.ts`, optional scale-in entrance animation.
+- **FocusPull** — Blur transition wrapper for scene changes. Cycles through an array of blur radius values (`blurSteps`) held for `framesPerStep` frames each. Hard-steps by default (posterized feel) or smooth interpolation with optional easing. Default sequence: `[0, 15, 10, 5, 15, 10, 5, 0]`.
+- **FootageHomogenizer** — Shared treatment wrapper for normalizing mismatched source clips. Layered opt-in: grayscale (full or partial), heavy grain, radial edge blur, chromatic aberration, exposure flicker, vignette, optional warmth tint. All layers default on. Reuses `ChromaticAberrationFilter` and `GrainFilter` from v0.1.0 svg-filters.
+- **LightLeak** — Additive blend light leak overlay for organic discoloration. Accepts texture image via `src` or falls back to procedural radial gradient (warm amber). Animated drift with configurable speed/angle. Fade-in/fade-out via `enterDuration`/`exitDuration`.
+- **Article3D** — Standalone CSS perspective transforms with animated swivel (Y-axis) and tilt (X-axis) rotation. Dynamic drop shadow shifts with rotation angle. Composes with ArticleZoom for camera pan + 3D rotation, or wraps any content independently.
+
+### New Utilities
+
+- **`src/utils/timings.ts`** — SFX timing system. Pure functions that return `VoxEvent[]` frame markers for audio synchronization:
+  - `getTypewriterTimings()` — `'letter'` per character (with label), `'line-complete'`, `'complete'`
+  - `getGridTimings()` — `'grid-in'`, `'grid-settled'`
+  - `getFocusPullTimings()` — `'blur-peak'` at local maxima, `'sharp'` at zero-blur frames
+  - `getHomogenizerTimings()` — `'treatment-start'`, `'treatment-complete'`
+  - `getLightLeakTimings()` — `'leak-in'`, `'leak-peak'`, `'leak-out'`
+  - `getArticle3DTimings()` — `'rotation-start'`, `'rotation-land'`
+- **`VoxEvent` type** — `{ frame: number; type: string; label?: string }` — shared event marker type for all timing functions
+
+### New Examples
+
+- **TitleCardReveal** — AnalogTreatment + GridBackground + TypewriterReveal + TextHighlighter (5s, 150 frames)
+- **ArchivalMontage** — FootageHomogenizer + FocusPull + Article3D + LightLeak (6s, 180 frames)
+
+### Infrastructure
+
+- All 6 new component prop types exported from index.ts
+- All 6 timing functions + VoxEvent type exported from index.ts
+- 6 new Remotion Studio test compositions in V020-Component-Tests folder
+- 2 new recipe compositions in Recipe-Examples folder
+- All v0.2.0 components include `className` and `style` pass-through props
+- All v0.2.0 components consume `useVoxDelay()` for OffsetGroup compatibility
+
+---
+
 ## v0.1.0 — 2026-04-01 (Initial Release)
 
 ### Components
