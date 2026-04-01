@@ -239,14 +239,6 @@ const FocusPullTestContent: React.FC = () => (
       </AbsoluteFill>
     </Sequence>
 
-    {/* FocusPull transition: overlay that blurs everything beneath it */}
-    <Sequence from={30} durationInFrames={24}>
-      <FocusPull
-        blurSteps={[0, 5, 10, 15, 15, 10, 5, 0]}
-        framesPerStep={3}
-      />
-    </Sequence>
-
     {/* Scene B: visible frames 45-89 */}
     <Sequence from={45} durationInFrames={45}>
       <AbsoluteFill>
@@ -262,6 +254,14 @@ const FocusPullTestContent: React.FC = () => (
           </div>
         </AbsoluteFill>
       </AbsoluteFill>
+    </Sequence>
+
+    {/* FocusPull: MUST be last in JSX so it sits on top of both scenes */}
+    <Sequence from={30} durationInFrames={24}>
+      <FocusPull
+        blurSteps={[0, 5, 10, 15, 15, 10, 5, 0]}
+        framesPerStep={3}
+      />
     </Sequence>
   </AnalogTreatment>
 );
