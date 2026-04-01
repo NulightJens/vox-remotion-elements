@@ -34,6 +34,8 @@ export const ArticleReveal: React.FC<{ src?: string }> = ({
         delay={40}
         duration={18}
         color={VoxTheme.colors.highlightYellow}
+        background="rgba(245,240,232,0.92)"
+        padding={24}
       />
     </AbsoluteFill>
     <div style={{ position: "absolute", top: 850, left: 700 }}>

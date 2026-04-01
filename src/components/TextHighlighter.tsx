@@ -16,6 +16,11 @@ export type TextHighlighterProps = {
   sequential?: boolean;
   fontSize?: number;
   fontFamily?: string;
+  /** Background behind the text+highlight group. Use for visibility over busy images.
+   *  e.g. "rgba(245,240,232,0.9)" for a warm paper-like backing. */
+  background?: string | null;
+  /** Padding around text when background is set (px). */
+  padding?: number;
 };
 
 export const TextHighlighter: React.FC<TextHighlighterProps> = ({
@@ -30,6 +35,8 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
   sequential = true,
   fontSize = 42,
   fontFamily = VoxTheme.fonts.body,
+  background = null,
+  padding = 20,
 }) => {
   const frame = useCurrentFrame();
   const { delay: offsetDelay } = useVoxDelay();
@@ -43,7 +50,19 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
   const filterId = `vox-highlight-roughen-${totalDelay}`;
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div
+      style={{
+        position: "relative",
+        display: "inline-block",
+        ...(background
+          ? {
+              backgroundColor: background,
+              padding,
+              borderRadius: 4,
+            }
+          : {}),
+      }}
+    >
       <RoughenEdgesFilter
         id={filterId}
         roughness={displacementScale}

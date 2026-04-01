@@ -17,6 +17,7 @@ export type TextMatchCutProps = {
   highlightColor?: string;
   highlightBlend?: string;
   highlightRoughness?: number;
+  highlightOpacity?: number;
   highlightDelay?: number;
   delay?: number;
   wordBox?: { width: number; height: number };
@@ -27,8 +28,9 @@ export const TextMatchCut: React.FC<TextMatchCutProps> = ({
   framesPerImage = 4,
   highlightWord = true,
   highlightColor = VoxTheme.colors.yellow,
-  highlightBlend = "darken",
+  highlightBlend = "normal",
   highlightRoughness = 12,
+  highlightOpacity = 0.85,
   highlightDelay = 0,
   delay = 0,
   wordBox = { width: 200, height: 40 },
@@ -136,6 +138,7 @@ export const TextMatchCut: React.FC<TextMatchCutProps> = ({
               width={wordBox.width}
               height={wordBox.height}
               fill={highlightColor}
+              opacity={highlightOpacity}
               clipPath={`url(#${clipId})`}
             />
           </svg>

@@ -102,9 +102,9 @@ export const AnalogTreatment: React.FC<AnalogTreatmentProps> = ({
       {!paperTexture && grain > 0 && (
         <AbsoluteFill
           style={{
-            backgroundColor: "rgba(128,128,128,0.5)",
+            backgroundColor: "rgba(128,128,128,0.3)",
             filter: `url(#${grainId})`,
-            opacity: grain,
+            opacity: grain * 0.6,
             mixBlendMode: "overlay",
             pointerEvents: "none",
           }}

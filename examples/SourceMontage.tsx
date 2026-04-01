@@ -54,6 +54,8 @@ export const SourceMontage: React.FC = () => (
           fontSize={44}
           duration={20}
           color={VoxTheme.colors.highlightYellow}
+          background="rgba(245,240,232,0.92)"
+          padding={24}
         />
       </AbsoluteFill>
     </Sequence>
