@@ -10,7 +10,7 @@
 
 A standalone npm package of composable Remotion components that bring Vox-style analog editing techniques to programmatic video. Vox's visual language is analog-first: screens feel like screens, paper feels like paper, nothing is sterile or purely digital. This library encodes that philosophy as React components.
 
-## Components (6)
+## Components (12)
 
 | Component | Purpose | Key Feature |
 |-----------|---------|-------------|
@@ -21,6 +21,17 @@ A standalone npm package of composable Remotion components that bring Vox-style 
 | **ArticleZoom** | Camera pan over source material | Scan lines, flicker, depth of field, screen tint |
 | **TextMatchCut** | Rapid screenshot montage | Word alignment, 4-frame cuts, highlight after settle |
 
+### v0.2.0
+
+| Component | Purpose | Key Feature |
+|-----------|---------|-------------|
+| **TypewriterReveal** | Letter-by-letter text reveal | Vox title cards, optional cursor/roughness, SFX timing |
+| **GridBackground** | Graph paper overlay with mask | Blob/rect/ellipse masks, wiggle, feathered edges |
+| **FocusPull** | Blur cycling transition | Posterized or eased blur steps between scenes |
+| **FootageHomogenizer** | Shared source treatment | B&W + grain + blur + flicker to normalize mixed clips |
+| **LightLeak** | Additive light overlay | Drift animation, procedural fallback, fade in/out |
+| **Article3D** | CSS perspective transforms | Animated swivel/tilt, dynamic shadow |
+
 ## Utilities
 
 | File | Exports |
@@ -28,6 +39,7 @@ A standalone npm package of composable Remotion components that bring Vox-style 
 | `src/utils/posterize.ts` | `posterizeFrame(frame, compositionFps, targetFps)` |
 | `src/utils/noise.ts` | `seededNoise(frame, seed)`, `wiggle(frame, freq, amp, fps, seed)` |
 | `src/utils/svg-filters.tsx` | `ChromaticAberrationFilter`, `RoughenEdgesFilter`, `GrainFilter` |
+| `src/utils/timings.ts` | `VoxEvent`, `getTypewriterTimings`, `getGridTimings`, `getFocusPullTimings`, `getHomogenizerTimings`, `getLightLeakTimings`, `getArticle3DTimings` |
 
 ## Theme & Context
 
@@ -40,13 +52,22 @@ A standalone npm package of composable Remotion components that bring Vox-style 
 
 `arrow-curly`, `arrow-straight`, `circle`, `underline`, `bracket` — in `src/presets/`
 
-## Recipe Examples (3)
+## Recipe Examples (5)
+
+### v0.1.0
 
 | Example | Components Used | Duration |
 |---------|----------------|----------|
 | `ArticleReveal` | AnalogTreatment + ArticleZoom + TextHighlighter + HandDrawnReveal | 120 frames (4s) |
 | `SourceMontage` | AnalogTreatment + TextMatchCut + TextHighlighter | 120 frames (4s) |
 | `AnnotatedExplainer` | AnalogTreatment + OffsetGroup + TextHighlighter + HandDrawnReveal | 150 frames (5s) |
+
+### v0.2.0
+
+| Example | Components Used | Duration |
+|---------|----------------|----------|
+| `TitleCardReveal` | AnalogTreatment + GridBackground + TypewriterReveal + TextHighlighter | 150 frames (5s) |
+| `ArchivalMontage` | FootageHomogenizer + FocusPull + Article3D + LightLeak | 180 frames (6s) |
 
 ## File Structure
 
@@ -63,11 +84,18 @@ src/
 │   ├── HandDrawnReveal.tsx
 │   ├── OffsetGroup.tsx
 │   ├── ArticleZoom.tsx
-│   └── TextMatchCut.tsx
+│   ├── TextMatchCut.tsx
+│   ├── TypewriterReveal.tsx      # v0.2.0
+│   ├── GridBackground.tsx        # v0.2.0
+│   ├── FocusPull.tsx             # v0.2.0
+│   ├── FootageHomogenizer.tsx    # v0.2.0
+│   ├── LightLeak.tsx            # v0.2.0
+│   └── Article3D.tsx            # v0.2.0
 ├── utils/
 │   ├── posterize.ts
 │   ├── noise.ts
-│   └── svg-filters.tsx
+│   ├── svg-filters.tsx
+│   └── timings.ts                # v0.2.0 — SFX sync utilities
 ├── presets/
 │   ├── index.ts
 │   ├── arrows.ts
@@ -78,7 +106,9 @@ src/
 examples/
 ├── ArticleReveal.tsx
 ├── SourceMontage.tsx
-└── AnnotatedExplainer.tsx
+├── AnnotatedExplainer.tsx
+├── TitleCardReveal.tsx           # v0.2.0
+└── ArchivalMontage.tsx           # v0.2.0
 ```
 
 ## Commands
@@ -105,5 +135,6 @@ Tutorial transcripts (~22,000 words) from 6 YouTube videos on Vox editing techni
 
 ## Specs & Plans
 
-- Design spec: `docs/superpowers/specs/2026-04-01-vox-remotion-elements-design.md`
-- Implementation plan: `docs/superpowers/plans/2026-04-01-vox-remotion-elements.md`
+- v0.1.0 design spec: `docs/superpowers/specs/2026-04-01-vox-remotion-elements-design.md`
+- v0.2.0 design spec: `docs/superpowers/specs/2026-04-01-vox-remotion-elements-v020-design.md`
+- v0.1.0 implementation plan: `docs/superpowers/plans/2026-04-01-vox-remotion-elements.md`
