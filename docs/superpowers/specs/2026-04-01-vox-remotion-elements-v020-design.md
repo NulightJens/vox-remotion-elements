@@ -60,7 +60,7 @@ export type VoxEvent = {
 | `getGridTimings` | `(props: { delay?: number; enterDuration?: number \| null }) => VoxEvent[]` | `'grid-in'` at entrance start, `'grid-settled'` at entrance end |
 | `getFocusPullTimings` | `(props: { blurSteps?: number[]; framesPerStep?: number; delay?: number }) => VoxEvent[]` | `'blur-peak'` at local max blur frames, `'sharp'` at zero-blur frames |
 | `getHomogenizerTimings` | `(props: { delay?: number }) => VoxEvent[]` | `'treatment-start'`, `'treatment-complete'` |
-| `getLightLeakTimings` | `(props: { delay?: number; enterDuration?: number \| null; exitDuration?: number \| null; totalDuration?: number }) => VoxEvent[]` | `'leak-in'` at fade start, `'leak-peak'` at full opacity, `'leak-out'` at fade-out start |
+| `getLightLeakTimings` | `(props: { delay?: number; duration?: number; enterDuration?: number \| null; exitDuration?: number \| null }) => VoxEvent[]` | `'leak-in'` at fade start, `'leak-peak'` at full opacity, `'leak-out'` at fade-out start |
 | `getArticle3DTimings` | `(props: { delay?: number; duration?: number }) => VoxEvent[]` | `'rotation-start'` at delay, `'rotation-land'` at delay + duration |
 
 ### Usage Pattern
@@ -104,7 +104,7 @@ Letter-by-letter text reveal for Vox title cards. Source: GFbh6RuuFVA (AE "typew
 | `cursorBlinkRate` | `number` | `8` | Frames per blink cycle |
 | `roughness` | `number` | `0` | Edge roughness via SVG displacement. 0 = clean text. Non-zero activates RoughenEdgesFilter for hand-stamped look. |
 | `fontSize` | `number` | `72` | Text size in px |
-| `fontFamily` | `string` | `'Bebas Neue'` | Font (default: VoxTheme.fonts.accent) |
+| `fontFamily` | `string` | `VoxTheme.fonts.accent` | Font — defaults to Bebas Neue via theme token |
 | `color` | `string` | `'#1a1a1a'` | Text color |
 | `lineSpacing` | `number` | `1.2` | Line height multiplier |
 | `sequential` | `boolean` | `true` | Multi-line: next line starts after previous completes |
@@ -154,7 +154,7 @@ Graph paper / grid overlay with organic mask and wiggle. Source: 4OzFNpnXcZg (gr
 - Grid via `repeating-linear-gradient` in both axes on a `<div>`. No SVG, no canvas — pure CSS.
 - Wiggle: container `transform: translate()` driven by `wiggle()` from existing `noise.ts`, applied to posterized frame.
 - Mask: SVG `<clipPath>` on the grid container.
-  - `'blob'`: procedural 8-point radial polygon with noise-perturbed vertices (seeded).
+  - `'blob'`: procedural 8-point radial polygon. Base radius = `maskScale * min(width, height) / 2`. Each vertex perturbed by ±15% using `seededNoise(vertexIndex, seed)`. Produces organic, non-repeating shapes.
   - `'rect'`: simple rectangle at `maskScale` size.
   - `'ellipse'`: ellipse at `maskScale` size.
   - Custom string: raw SVG path data in the `<clipPath>`.
@@ -238,6 +238,7 @@ Additive blend light leak overlay for organic discoloration. Source: sACZlG7z35Q
 | `enterDuration` | `number \| null` | `null` | Frames to fade in. Null = already visible. |
 | `exitDuration` | `number \| null` | `null` | Frames to fade out. Null = stays. |
 | `delay` | `number` | `0` | Start frame offset |
+| `duration` | `number` | `60` | Total duration in frames (needed by timing utility to calculate exit events) |
 | `seed` | `number` | `0` | Noise seed for drift variation |
 | `className` | `string` | `''` | CSS class pass-through |
 | `style` | `CSSProperties` | `{}` | Style pass-through |
@@ -247,7 +248,7 @@ Additive blend light leak overlay for organic discoloration. Source: sACZlG7z35Q
 - With `src`: `<Img>` element with texture, blended via `mix-blend-mode`. Absolutely positioned over parent.
 - Without `src`: procedural radial CSS gradient (warm amber → transparent) simulating a basic light leak.
 - Drift: `transform: translate()` shifts position using `frame * driftSpeed` at the given angle.
-- Enter/exit: opacity interpolated from 0 to target over duration.
+- Enter/exit: opacity interpolated from 0 to target over duration. Exit starts at `delay + duration - exitDuration`.
 
 ---
 
@@ -333,7 +334,7 @@ export type { LightLeakProps } from './components/LightLeak';
 export type { Article3DProps } from './components/Article3D';
 
 // Timing utilities
-export { VoxEvent } from './utils/timings';
+export type { VoxEvent } from './utils/timings';
 export {
   getTypewriterTimings,
   getGridTimings,
@@ -343,6 +344,12 @@ export {
   getArticle3DTimings,
 } from './utils/timings';
 ```
+
+---
+
+## Known Gaps from v0.1.0
+
+- **className/style pass-through**: AnalogTreatment has className/style props, but ArticleZoom, TextHighlighter, HandDrawnReveal, and TextMatchCut do not. All v0.2.0 components include them. Adding className/style to the 4 v0.1.0 components is deferred to a separate patch (not part of this spec).
 
 ---
 
