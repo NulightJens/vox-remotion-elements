@@ -6,6 +6,14 @@ export { OffsetGroup } from "./components/OffsetGroup";
 export { ArticleZoom } from "./components/ArticleZoom";
 export { TextMatchCut } from "./components/TextMatchCut";
 
+// Component prop types
+export type { AnalogTreatmentProps } from "./components/AnalogTreatment";
+export type { TextHighlighterProps } from "./components/TextHighlighter";
+export type { HandDrawnRevealProps } from "./components/HandDrawnReveal";
+export type { OffsetGroupProps } from "./components/OffsetGroup";
+export type { ArticleZoomProps } from "./components/ArticleZoom";
+export type { TextMatchCutProps } from "./components/TextMatchCut";
+
 // Theme and context
 export { VoxTheme } from "./theme";
 export { VoxOffsetContext, useVoxDelay } from "./context";

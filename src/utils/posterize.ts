@@ -15,6 +15,6 @@ export function posterizeFrame(
     }
     return frame;
   }
-  const step = Math.round(compositionFps / targetFps);
+  const step = Math.max(1, Math.floor(compositionFps / targetFps));
   return Math.floor(frame / step) * step;
 }

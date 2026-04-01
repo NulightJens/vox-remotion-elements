@@ -70,7 +70,7 @@ export const AnalogTreatment: React.FC<AnalogTreatmentProps> = ({
             backgroundSize: "cover",
             backgroundPosition: "center",
             opacity: 0.4,
-            mixBlendMode: "multiply",
+            mixBlendMode: "overlay",
           }}
         />
       )}
@@ -83,7 +83,7 @@ export const AnalogTreatment: React.FC<AnalogTreatmentProps> = ({
             backgroundSize: "cover",
             backgroundPosition: "center",
             opacity: 0.15,
-            mixBlendMode: "multiply",
+            mixBlendMode: "overlay",
           }}
         />
       )}
@@ -98,12 +98,14 @@ export const AnalogTreatment: React.FC<AnalogTreatmentProps> = ({
         {children}
       </AbsoluteFill>
 
-      {/* Layer 5: Procedural grain (only if no paper texture) */}
-      {!paperTexture && (
+      {/* Procedural grain overlay (when no paper texture) */}
+      {!paperTexture && grain > 0 && (
         <AbsoluteFill
           style={{
+            backgroundColor: "rgba(128,128,128,0.5)",
             filter: `url(#${grainId})`,
             opacity: grain,
+            mixBlendMode: "overlay",
             pointerEvents: "none",
           }}
         />

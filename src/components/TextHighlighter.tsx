@@ -66,8 +66,6 @@ export const TextHighlighter: React.FC<TextHighlighterProps> = ({
           }
         );
 
-        const yOffset = index * lineHeight;
-
         return (
           <div
             key={index}

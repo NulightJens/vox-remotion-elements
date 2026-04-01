@@ -43,15 +43,18 @@ function buildOrderIndices(
 
 export const OffsetGroup: React.FC<OffsetGroupProps> = ({
   stagger = 3,
-  exitStagger = null,
-  exitAt = null,
+  exitStagger: _exitStagger = null,
+  exitAt: _exitAt = null,
   direction = "forward",
   children,
 }) => {
   const childArray = React.Children.toArray(children);
   const count = childArray.length;
   const orderIndices = buildOrderIndices(count, direction);
-  const effectiveExitStagger = exitStagger ?? stagger;
+  // exitStagger and exitAt are accepted props but duration is not restricted —
+  // parent composition controls when children unmount.
+  void _exitStagger;
+  void _exitAt;
 
   return (
     <>
@@ -59,15 +62,8 @@ export const OffsetGroup: React.FC<OffsetGroupProps> = ({
         const orderIndex = orderIndices[i];
         const entranceDelay = orderIndex * stagger;
 
-        // Calculate duration for this sequence
-        let sequenceDuration: number | undefined;
-        if (exitAt != null) {
-          // Exit uses reverse stagger order
-          const exitOrderIndex = count - 1 - orderIndex;
-          const exitDelay = exitAt + exitOrderIndex * effectiveExitStagger;
-          // Sequence ends some frames after the exit starts (give time for exit animation)
-          sequenceDuration = exitDelay + effectiveExitStagger * count - entranceDelay;
-        }
+        // Don't restrict sequence duration — let parent composition control it
+        const sequenceDuration = undefined;
 
         return (
           <Sequence
@@ -76,7 +72,7 @@ export const OffsetGroup: React.FC<OffsetGroupProps> = ({
             durationInFrames={sequenceDuration}
             layout="none"
           >
-            <VoxOffsetContext.Provider value={{ delay: entranceDelay }}>
+            <VoxOffsetContext.Provider value={{ delay: 0 }}>
               {child}
             </VoxOffsetContext.Provider>
           </Sequence>

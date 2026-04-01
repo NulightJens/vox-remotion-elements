@@ -69,7 +69,9 @@ export const TextMatchCut: React.FC<TextMatchCutProps> = ({
 
   const showHighlight = highlightWord && montageEnded && localFrame >= totalMontageFrames + highlightDelay;
 
-  const filterId = "vox-matchcut-roughen";
+  const instanceId = `${totalDelay}-${screenshots.length}`;
+  const filterId = `vox-matchcut-roughen-${instanceId}`;
+  const clipId = `vox-matchcut-clip-${instanceId}`;
 
   // Highlight reveal: clip-path from 0 to full width
   const highlightLocalFrame = localFrame - totalMontageFrames - highlightDelay;
@@ -119,7 +121,7 @@ export const TextMatchCut: React.FC<TextMatchCutProps> = ({
             }}
           >
             <defs>
-              <clipPath id="vox-matchcut-clip">
+              <clipPath id={clipId}>
                 <rect
                   x={0}
                   y={0}
@@ -134,7 +136,7 @@ export const TextMatchCut: React.FC<TextMatchCutProps> = ({
               width={wordBox.width}
               height={wordBox.height}
               fill={highlightColor}
-              clipPath="url(#vox-matchcut-clip)"
+              clipPath={`url(#${clipId})`}
             />
           </svg>
         </AbsoluteFill>
