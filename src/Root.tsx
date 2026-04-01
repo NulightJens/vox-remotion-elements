@@ -1,5 +1,5 @@
 import React from "react";
-import { AbsoluteFill, Composition } from "remotion";
+import { AbsoluteFill, Composition, Folder } from "remotion";
 import { AnalogTreatment } from "./components/AnalogTreatment";
 import { TextHighlighter } from "./components/TextHighlighter";
 import { HandDrawnReveal } from "./components/HandDrawnReveal";
@@ -7,6 +7,11 @@ import { OffsetGroup } from "./components/OffsetGroup";
 import { ArticleZoom } from "./components/ArticleZoom";
 import { TextMatchCut } from "./components/TextMatchCut";
 import { VoxTheme } from "./theme";
+
+// Example compositions
+import { ArticleReveal } from "../examples/ArticleReveal";
+import { SourceMontage } from "../examples/SourceMontage";
+import { AnnotatedExplainer } from "../examples/AnnotatedExplainer";
 
 const AnalogTestContent: React.FC = () => (
   <AnalogTreatment>
@@ -146,62 +151,83 @@ const OffsetGroupTestContent: React.FC = () => (
 export const Root: React.FC = () => {
   return (
     <>
-      <Composition
-        id="Placeholder"
-        component={() => <div style={{ background: '#f5f0e8', width: '100%', height: '100%' }} />}
-        durationInFrames={30}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
-      <Composition
-        id="AnalogTest"
-        component={AnalogTestContent}
-        durationInFrames={90}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
-      <Composition
-        id="HighlighterTest"
-        component={HighlighterTestContent}
-        durationInFrames={120}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
-      <Composition
-        id="HandDrawnTest"
-        component={HandDrawnTestContent}
-        durationInFrames={120}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
-      <Composition
-        id="OffsetGroupTest"
-        component={OffsetGroupTestContent}
-        durationInFrames={120}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
-      <Composition
-        id="ArticleZoomTest"
-        component={ArticleZoomTestContent}
-        durationInFrames={120}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
-      <Composition
-        id="MatchCutTest"
-        component={MatchCutTestContent}
-        durationInFrames={90}
-        fps={30}
-        width={1080}
-        height={1920}
-      />
+      <Folder name="Component-Tests">
+        <Composition
+          id="AnalogTest"
+          component={AnalogTestContent}
+          durationInFrames={90}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="HighlighterTest"
+          component={HighlighterTestContent}
+          durationInFrames={120}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="HandDrawnTest"
+          component={HandDrawnTestContent}
+          durationInFrames={120}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="OffsetGroupTest"
+          component={OffsetGroupTestContent}
+          durationInFrames={120}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="ArticleZoomTest"
+          component={ArticleZoomTestContent}
+          durationInFrames={120}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="MatchCutTest"
+          component={MatchCutTestContent}
+          durationInFrames={90}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+      </Folder>
+
+      <Folder name="Recipe-Examples">
+        <Composition
+          id="ArticleReveal"
+          component={ArticleReveal}
+          durationInFrames={120}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="SourceMontage"
+          component={SourceMontage}
+          durationInFrames={120}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+        <Composition
+          id="AnnotatedExplainer"
+          component={AnnotatedExplainer}
+          durationInFrames={150}
+          fps={30}
+          width={1080}
+          height={1920}
+        />
+      </Folder>
     </>
   );
 };
