@@ -4,6 +4,8 @@ import { AnalogTreatment } from "./components/AnalogTreatment";
 import { TextHighlighter } from "./components/TextHighlighter";
 import { HandDrawnReveal } from "./components/HandDrawnReveal";
 import { OffsetGroup } from "./components/OffsetGroup";
+import { ArticleZoom } from "./components/ArticleZoom";
+
 import { VoxTheme } from "./theme";
 
 const AnalogTestContent: React.FC = () => (
@@ -89,6 +91,22 @@ const HandDrawnTestContent: React.FC = () => (
   </AnalogTreatment>
 );
 
+const ArticleZoomTestContent: React.FC = () => (
+  <AnalogTreatment>
+    <ArticleZoom
+      src="https://picsum.photos/seed/article-test/1080/1920"
+      startPosition={{ x: 0, y: 10 }}
+      endPosition={{ x: 0, y: -10 }}
+      startScale={1.1}
+      endScale={1.2}
+      scanLines={true}
+      flicker={0.05}
+      depthOfField={3}
+      duration={90}
+    />
+  </AnalogTreatment>
+);
+
 const OffsetGroupTestContent: React.FC = () => (
   <AnalogTreatment>
     <AbsoluteFill
@@ -146,6 +164,14 @@ export const Root: React.FC = () => {
       <Composition
         id="OffsetGroupTest"
         component={OffsetGroupTestContent}
+        durationInFrames={120}
+        fps={30}
+        width={1080}
+        height={1920}
+      />
+      <Composition
+        id="ArticleZoomTest"
+        component={ArticleZoomTestContent}
         durationInFrames={120}
         fps={30}
         width={1080}
