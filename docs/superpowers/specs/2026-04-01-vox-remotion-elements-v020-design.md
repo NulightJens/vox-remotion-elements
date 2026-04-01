@@ -165,7 +165,7 @@ Graph paper / grid overlay with organic mask and wiggle. Source: 4OzFNpnXcZg (gr
 
 ### 3. FocusPull
 
-Blur transition between scenes. Source: 4OzFNpnXcZg (blur keyframed every 2 frames: 15→10→5→15→10→5).
+Blur transition between scenes. Designed to span scene cuts — place it as a `<Sequence>` overlapping the transition point so blur ramps up during scene A's exit and ramps back down during scene B's entry, creating a "rack focus" lens effect that masks the cut. Source: 4OzFNpnXcZg (blur keyframed every 2 frames: 15→10→5→15→10→5).
 
 **Props:**
 

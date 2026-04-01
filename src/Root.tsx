@@ -222,23 +222,49 @@ const GridTestContent: React.FC = () => (
 
 const FocusPullTestContent: React.FC = () => (
   <AnalogTreatment>
-    <FocusPull
-      blurSteps={[0, 15, 10, 5, 15, 10, 5, 0]}
-      framesPerStep={3}
-      delay={10}
-    >
-      <AbsoluteFill
-        style={{
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
+    {/* Scene A: visible frames 0-44 */}
+    <Sequence from={0} durationInFrames={45}>
+      <AbsoluteFill>
         <Img
-          src="https://picsum.photos/seed/focuspull/1080/1920"
+          src="https://picsum.photos/seed/focusA/1080/1920"
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />
+        <AbsoluteFill
+          style={{ justifyContent: "center", alignItems: "center" }}
+        >
+          <div style={{ fontFamily: VoxTheme.fonts.accent, fontSize: 72, color: "white", textShadow: "0 2px 8px rgba(0,0,0,0.7)" }}>
+            SCENE A
+          </div>
+        </AbsoluteFill>
       </AbsoluteFill>
-    </FocusPull>
+    </Sequence>
+
+    {/* FocusPull transition: blurs up during scene A exit, sharp at scene B entry */}
+    <Sequence from={30} durationInFrames={24}>
+      <FocusPull
+        blurSteps={[0, 5, 10, 15, 15, 10, 5, 0]}
+        framesPerStep={3}
+      >
+        <AbsoluteFill />
+      </FocusPull>
+    </Sequence>
+
+    {/* Scene B: visible frames 45-89 */}
+    <Sequence from={45} durationInFrames={45}>
+      <AbsoluteFill>
+        <Img
+          src="https://picsum.photos/seed/focusB/1080/1920"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+        <AbsoluteFill
+          style={{ justifyContent: "center", alignItems: "center" }}
+        >
+          <div style={{ fontFamily: VoxTheme.fonts.accent, fontSize: 72, color: "white", textShadow: "0 2px 8px rgba(0,0,0,0.7)" }}>
+            SCENE B
+          </div>
+        </AbsoluteFill>
+      </AbsoluteFill>
+    </Sequence>
   </AnalogTreatment>
 );
 
