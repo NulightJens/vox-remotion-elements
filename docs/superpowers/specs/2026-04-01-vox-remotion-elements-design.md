@@ -1,8 +1,9 @@
 # Vox Remotion Elements — Design Spec
 
 **Date:** 2026-04-01
-**Status:** Approved
+**Status:** Approved (rev 2 — post spec review)
 **Scope:** Component library + Claude Code skill for Vox-style video editing in Remotion
+**Target Resolution:** 1080x1920 (9:16 vertical) at 30fps — matches content-autopilot pipeline. All pixel values are absolute for this resolution.
 
 ---
 
@@ -59,7 +60,8 @@ vox-remotion-elements/
 │   │   ├── ArticleZoom.tsx       # Source material camera pan + screen emulation
 │   │   ├── TextMatchCut.tsx      # Rapid screenshot montage with word alignment
 │   │   └── OffsetGroup.tsx       # Stagger utility for entrance/exit timing
-│   ├── theme.ts                  # VoxTheme design tokens
+│   ├── theme.ts                  # VoxTheme design tokens + easings
+│   ├── context.ts                # VoxOffsetContext + useVoxDelay() hook
 │   ├── utils/
 │   │   ├── posterize.ts          # Frame stepping math
 │   │   ├── noise.ts              # Deterministic noise (shake, flicker, wiggle)
@@ -81,9 +83,9 @@ vox-remotion-elements/
 │       ├── underline-rough.svg
 │       └── bracket-left.svg
 ├── examples/
-│   ├── ArticleReveal.tsx
-│   ├── SourceMontage.tsx
-│   └── AnnotatedExplainer.tsx
+│   ├── ArticleReveal.tsx         # Recipe: ArticleZoom + TextHighlighter + HandDrawnReveal arrow callout
+│   ├── SourceMontage.tsx         # Recipe: TextMatchCut rapid screenshots → TextHighlighter on settled image
+│   └── AnnotatedExplainer.tsx    # Recipe: OffsetGroup staggering HandDrawnReveal lines + TextHighlighter
 └── research/
     └── transcripts/              # Source tutorial transcripts (already populated)
 ```
@@ -106,21 +108,24 @@ The foundational layer. Wraps any content and applies the Vox analog feel. Every
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `fps` | `8 \| 12 \| 15` | `12` | Posterize time frame rate |
+| `fps` | `number` | `12` | Posterize time frame rate (8=very choppy, 12=standard Vox, 15=subtle). Accepts any positive integer; warns if > composition FPS. |
 | `grain` | `number` | `0.15` | Noise overlay opacity (0-1) |
 | `chromaticAberration` | `number` | `0.8` | RGB channel offset in pixels |
 | `vignette` | `number` | `0.3` | Vignette strength (0-1) |
 | `warmth` | `string` | `#f5f0e8` | Background tint |
-| `paperTexture` | `string \| null` | `null` | Texture image path (falls back to procedural) |
-| `halftoneTexture` | `string \| null` | `null` | Halftone overlay path |
+| `paperTexture` | `string \| null` | `null` | Texture image path via `staticFile()`. Falls back to procedural SVG feTurbulence. |
+| `halftoneTexture` | `string \| null` | `null` | Halftone overlay path via `staticFile()` |
 | `cameraShake` | `{ frequency: number; amplitude: number }` | `{ frequency: 2, amplitude: 2 }` | Wiggle-style camera shake |
+| `seed` | `number` | `0` | Noise seed for deterministic but unique shake/flicker patterns across multiple instances |
+| `className` | `string` | `''` | CSS class pass-through |
+| `style` | `CSSProperties` | `{}` | Style pass-through |
 | `children` | `ReactNode` | — | Content to wrap |
 
 **Implementation:**
 
 - **Posterize time:** `Math.floor(frame / step) * step` where `step = compositionFps / posterizeFps`. All children render at the stepped frame value, creating the choppy handcrafted feel.
 - **Grain:** SVG `<feTurbulence type="fractal" baseFrequency="0.65" numOctaves="3" />` as a full-frame overlay. When `paperTexture` is provided, the image is overlaid with `mix-blend-mode: overlay` instead.
-- **Chromatic aberration:** Three absolute-positioned copies of children, each with CSS filter isolating one RGB channel, offset by `chromaticAberration` pixels in opposing directions. Subtle at 0.8px — the transcript warns "dialing it too much can look amateur."
+- **Chromatic aberration:** Single SVG filter definition using `<feColorMatrix>` to isolate R/G/B channels, `<feOffset>` to shift each, and `<feComposite>` to merge. Applied as `filter: url(#vox-chromatic-aberration)` on the content container — one render pass, not three copies of children. Defined in `svg-filters.ts` and injected into the DOM once. Subtle at 0.8px — the transcript warns "dialing it too much can look amateur."
 - **Vignette:** Radial gradient overlay from `transparent` center to `rgba(0,0,0,vignette)` edges.
 - **Camera shake:** Per-stepped-frame transform offset using deterministic noise seeded by frame number. `translateX(noise(frame) * amplitude)px translateY(noise(frame + 1000) * amplitude)px`.
 - **Warmth:** Background `div` with the warm tint behind all children.
@@ -136,7 +141,7 @@ The single most recognizable Vox visual element. An animated highlight that swee
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `text` | `string` | — | Text to display and highlight |
+| `text` | `string \| string[]` | — | Text to display and highlight. Pass array for explicit line control (recommended for multi-line). |
 | `color` | `string` | `#FFD700` | Highlight color |
 | `blendMode` | `string` | `multiply` | CSS mix-blend-mode |
 | `brushHardness` | `number` | `0.85` | Edge sharpness (0=soft, 1=hard) |
@@ -154,7 +159,7 @@ The single most recognizable Vox visual element. An animated highlight that swee
 - Highlight is an SVG `<rect>` behind the text using `mix-blend-mode: multiply` — this is critical because multiply retains the paper grain and texture, making the highlight feel physical rather than digital.
 - Animation via SVG `clip-path` or `mask` revealing left-to-right, driven by Remotion's `interpolate()`.
 - Edge roughness via SVG filter chain: `<feTurbulence baseFrequency="0.04" numOctaves="4" />` → `<feDisplacementMap scale={roughness} />`. Brush hardness controls the displacement scale inversely — 0.85 hardness means scale of ~2-3px, enough for subtle imperfection without looking torn.
-- Multi-line: each line's highlight is a separate SVG rect. When `sequential=true`, the second line starts animating only after the first completes. When `false`, all highlight simultaneously.
+- Multi-line: when `text` is an array, each string gets its own SVG rect. When `sequential=true`, the second line starts animating only after the first completes. When `false`, all highlight simultaneously. Single string is treated as one line.
 - The transcript specifically says "the more slightly imperfect that looks, the better."
 
 ### 3. HandDrawnReveal
@@ -171,16 +176,16 @@ SVG trim-path animation that makes lines, arrows, and circles appear to draw the
 | `strokeWidth` | `number` | `3` | Line thickness |
 | `duration` | `number` | `20` | Frames to complete draw |
 | `delay` | `number` | `0` | Start frame offset |
-| `colorOffset` | `{ color: string; frames: number } \| null` | `null` | Offset duplicate line |
+| `colorOffset` | `{ color: string; leadFrames: number } \| null` | `null` | Offset duplicate line — `leadFrames` is how many frames the offset color appears before the main stroke |
 | `roughness` | `number` | `2` | SVG displacement for hand-drawn feel |
 | `cap` | `'round' \| 'butt'` | `'round'` | Stroke line cap |
 | `fill` | `string \| null` | `null` | Optional fill color (for closed shapes like circles) |
 
 **Implementation:**
 
-- SVG `<path>` element with `stroke-dasharray` set to total path length (via `getTotalLength()`).
-- `stroke-dashoffset` animates from full length to 0, driven by `interpolate(frame, [delay, delay + duration], [pathLength, 0])`.
-- Color offset: a second identical `<path>` rendered behind the first, with `delay - colorOffset.frames` and `colorOffset.color`. Creates the "yellow first, black 3 frames after" effect from the transcripts.
+- SVG `<path>` element with `pathLength="1"` attribute (normalizes all paths to length 1, avoiding DOM measurement via `getTotalLength()`). `stroke-dasharray="1"` and `stroke-dashoffset` animates from 1 to 0.
+- Animation driven by `interpolate(frame, [delay, delay + duration], [1, 0], { easing: Easing.out(Easing.quad) })`.
+- Color offset: a second identical `<path>` rendered behind the first, starting at `delay - colorOffset.leadFrames` with `colorOffset.color`. Creates the "yellow first, black 3 frames after" effect from the transcripts.
 - Roughness via same feTurbulence + feDisplacementMap chain.
 - Round cap gives the "pen tip" feel that the transcript recommends.
 - Presets are pre-defined `d` attribute strings stored in `src/presets/`. They include multiple variants (e.g., 3 different curly arrows) so compositions don't look repetitive.
@@ -220,7 +225,7 @@ Rapid-fire screenshot switching with a consistent word position across all image
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `screenshots` | `Array<{ src: string; wordPosition: { x: number; y: number } }>` | — | Images with word anchor coordinates |
+| `screenshots` | `Array<{ src: string; wordPosition: { x: number; y: number } \| 'center' }>` | — | Images with word anchor coordinates. Use `'center'` for simple centered alignment without precise word positioning. |
 | `framesPerImage` | `number` | `4` | Duration per screenshot |
 | `highlightWord` | `boolean` | `true` | Add highlight over aligned word |
 | `highlightColor` | `string` | `#FFD700` | Highlight color |
@@ -254,7 +259,7 @@ Timing utility that staggers children's entrances and exits. Encodes the Vox pri
 **Implementation:**
 
 - Wraps each child in a Remotion `<Sequence>` with `from={index * stagger}`.
-- Children receive a `delay` prop via React context or cloneElement, allowing them to use the calculated offset in their own animations.
+- Provides a `VoxOffsetContext` (React context) with `{ delay: number }` for each child. Library components consume this internally. Third-party components can use the exported `useVoxDelay()` hook. No `cloneElement` — context only.
 - Exit: if `exitAt` is specified, children get a second sequence offset for their exit, staggered in reverse by default (last in, first out).
 - The transcript emphasizes: "things aren't meant to be perfect... offsetting key frames adds spice."
 
@@ -263,6 +268,8 @@ Timing utility that staggers children's entrances and exits. Encodes the Vox pri
 ## Design Tokens
 
 ```typescript
+import { Easing } from 'remotion';
+
 export const VoxTheme = {
   colors: {
     warmWhite: '#f5f0e8',      // Default background — never pure white
@@ -274,9 +281,17 @@ export const VoxTheme = {
     deepGray: '#272727',       // Secondary text
   },
   fonts: {
-    headline: 'Balto',         // Vox's headline font
+    headline: 'Balto',         // Vox's headline font (commercial — requires license)
+    headlineFallback: 'DM Sans', // Open-source fallback when Balto unavailable
     body: 'Sora',              // Clean sans-serif body
     accent: 'Bebas Neue',      // Bold display titles
+  },
+  easing: {
+    highlightStroke: Easing.out(Easing.cubic),   // Fast start, slow end — mimics pen stroke
+    cameraPan: Easing.inOut(Easing.quad),         // Smooth drift for ArticleZoom
+    trimPathReveal: Easing.out(Easing.quad),      // Drawing feel for HandDrawnReveal
+    elementEntrance: Easing.out(Easing.back(1.2)), // Slight overshoot for pop-in
+    elementExit: Easing.in(Easing.quad),           // Gentle acceleration out
   },
   treatment: {
     posterizeFps: 12,          // Standard Vox choppiness
@@ -289,6 +304,8 @@ export const VoxTheme = {
   },
 };
 ```
+
+**Font note:** `Balto` is a commercial typeface by Tal Leming. If publishing the package or using without a license, fall back to `headlineFallback` (DM Sans). Components default to `headlineFallback` and accept an override prop.
 
 ---
 
@@ -323,11 +340,20 @@ export const VoxTheme = {
 
 ---
 
+## Asset Delivery
+
+Textures are small files (< 200KB each). Two delivery modes:
+
+1. **Bundled (default):** Starter textures are base64-encoded and imported directly in component files. Components work out of the box with zero asset setup. Slight bundle size increase (~500KB total).
+2. **External (opt-in):** Users pass texture paths via `paperTexture`/`halftoneTexture` props, resolved via Remotion's `staticFile()`. Users must copy assets to their `public/` directory. Components show a helpful console warning if a texture path resolves to nothing.
+
+SVG presets (arrows, circles, underlines) are always bundled as path data strings in `src/presets/` — no file system dependency.
+
 ## Content-Autopilot Integration
 
 - Install via local file reference or npm: `npm install vox-remotion-elements`
 - Import: `import { AnalogTreatment, TextHighlighter } from 'vox-remotion-elements'`
-- Assets: copy `assets/` to `public/vox/` or configure static file serving
+- Bundled textures work immediately; optional high-res textures go in `public/vox/`
 - New compositions in `Root.tsx` use Vox elements alongside existing components
 - No changes to existing Bold Creator or Nshnv code — purely additive
 
@@ -337,19 +363,26 @@ export const VoxTheme = {
 
 Build order based on dependency chain and impact:
 
-1. **Utils** (`posterize.ts`, `noise.ts`, `svg-filters.ts`) — everything else depends on these
-2. **VoxTheme** (`theme.ts`) — design tokens referenced by all components
-3. **AnalogTreatment** — the wrapper that ties everything together
-4. **TextHighlighter** — highest-impact standalone element
-5. **HandDrawnReveal** — second most impactful, needed by recipes
-6. **OffsetGroup** — utility needed to compose elements together
-7. **ArticleZoom** — composition-level component
-8. **TextMatchCut** — composition-level component
-9. **Presets** — built-in SVG arrow/circle/underline paths
-10. **Assets** — source and bundle starter textures
-11. **Examples** — recipe compositions demonstrating each pattern
-12. **Skill** — Claude Code skill document
-13. **Package config** — npm publish setup, README
+**v1 (core package):**
+
+1. **Package scaffold** — `package.json`, `tsconfig.json`, Remotion setup, `.gitignore`
+2. **Utils** (`posterize.ts`, `noise.ts`, `svg-filters.ts`) — everything else depends on these
+3. **VoxTheme** (`theme.ts`) — design tokens and easings referenced by all components
+4. **VoxOffsetContext** (`context.ts`) — React context + `useVoxDelay()` hook
+5. **AnalogTreatment** — the wrapper that ties everything together
+6. **TextHighlighter** — highest-impact standalone element
+7. **HandDrawnReveal** — second most impactful, needed by recipes
+8. **OffsetGroup** — utility needed to compose elements together
+9. **ArticleZoom** — composition-level component
+10. **TextMatchCut** — composition-level component
+11. **Presets** — built-in SVG arrow/circle/underline paths
+12. **Assets** — source and base64-encode starter textures
+13. **Examples** — recipe compositions demonstrating each pattern
+14. **Package config** — npm publish setup, README, `index.ts` exports
+
+**Post-v1:**
+
+15. **Claude Code skill** — written from lived implementation experience, not spec assumptions. APIs will have been validated by this point.
 
 ---
 
@@ -362,3 +395,27 @@ Build order based on dependency chain and impact:
 - Package installs and imports without errors in a fresh Remotion project
 - Skill correctly guides component usage when invoked
 - Examples render complete compositions demonstrating each recipe
+
+---
+
+## Review Amendments (Rev 2)
+
+Changes made after spec review:
+
+| Issue | Resolution |
+|-------|-----------|
+| **C1.** Chromatic aberration 3x children perf | Single SVG filter with `feColorMatrix` + `feOffset` + `feComposite` — one render pass |
+| **C2.** `getTotalLength()` unavailable | Use `pathLength="1"` SVG attribute — no DOM measurement needed |
+| **C3.** Asset delivery incomplete | Base64-encoded bundled textures as default; `staticFile()` for opt-in external textures with console warnings |
+| **I1.** Multi-line detection | `text` prop accepts `string \| string[]` — array gives explicit line control |
+| **I2.** OffsetGroup injection fragile | `VoxOffsetContext` + `useVoxDelay()` hook — context only, no `cloneElement` |
+| **I3.** No easing specification | Added `VoxTheme.easing` with per-component defaults (cubic for highlights, quad for pans/reveals) |
+| **I4.** Manual word coordinates | Added `'center'` option to `wordPosition` for simple centered alignment |
+| **I5.** Balto commercial font | Documented as optional with `headlineFallback: 'DM Sans'`; components default to fallback |
+| **I6.** No resolution spec | Added target resolution 1080x1920 at 30fps in header |
+| **M1.** FPS union type | Changed to `number` with runtime warning |
+| **M2.** No className/style | Added `className` and `style` pass-through on AnalogTreatment |
+| **M3.** colorOffset.frames ambiguous | Renamed to `leadFrames` |
+| **M4.** Examples unspecified | Added descriptions to each example file in package structure |
+| **M5.** Noise seed missing | Added `seed` prop to AnalogTreatment |
+| **Scope** | Skill moved to post-v1 — write from lived implementation experience |
